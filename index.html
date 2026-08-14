@@ -1,0 +1,1115 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+<title>Alat Ukur Performa Script — Kubah Emas</title>
+<meta name="theme-color" content="#C89B00">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Alat Ukur Script">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-512.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  /* Brand: Yellow Kubah Emas + Charcoal + White — Bright Theme */
+  --or:#F5C518;--or-d:#C89B00;--or-l:#FFFBEA;--or-b:#FDE68A;
+  --ch:#1C1E26;--ch2:#3A3D4A;
+  --grn:#16A34A;--grn-l:#F0FDF4;--grn-b:#BBF7D0;
+  --amb:#D97706;--amb-l:#FFFBEB;--amb-b:#FDE68A;
+  --blu:#1D4ED8;--blu-l:#EFF6FF;--blu-b:#BFDBFE;
+  --red:#DC2626;--red-l:#FEF2F2;--red-b:#FECACA;
+  --gry:#6B7280;--gry-l:#F9FAFB;--gry-b:#E5E7EB;
+  --bg:#FAF8F6;--card:#FFFFFF;--card2:#F7F4F1;
+  --txt:#1C1E26;--txt2:#3A3D4A;--mut:#8A8D98;--bdr:#EAE6E1;
+  --shd:0 1px 6px rgba(0,0,0,.06);--shd2:0 4px 20px rgba(0,0,0,.12);
+  --r:14px;--font:'Poppins',-apple-system,sans-serif;
+}
+body{font-family:var(--font);background:var(--bg);color:var(--txt);min-height:100vh;-webkit-tap-highlight-color:transparent;padding-bottom:24px}
+input,select,textarea,button{font-family:var(--font)}
+
+.topbar{background:linear-gradient(135deg,var(--or),var(--or-d));padding:16px 18px;position:sticky;top:0;z-index:100;box-shadow:var(--shd2)}
+.topbar-inner{max-width:820px;margin:0 auto}
+.topbar-title{font-size:14px;font-weight:800;color:var(--ch)}
+.topbar-sub{font-size:10.5px;color:rgba(28,30,38,.7);font-weight:500;margin-bottom:12px}
+.page-tabs{display:flex;gap:8px}
+.page-tab{flex:1;padding:10px;border-radius:10px;border:1.5px solid rgba(28,30,38,.18);background:rgba(28,30,38,.08);color:rgba(28,30,38,.75);font-family:var(--font);font-size:12.5px;font-weight:700;cursor:pointer;text-align:center}
+.page-tab.active{background:#fff;color:var(--or-d);border-color:#fff}
+
+.wrap{max-width:820px;margin:0 auto;padding:16px 16px 40px}
+.page{display:none}
+.page.active{display:block}
+.section-title{font-size:12.5px;font-weight:800;color:var(--ch);text-transform:uppercase;letter-spacing:.04em;margin:22px 0 10px}
+.section-title:first-child{margin-top:4px}
+.card{background:var(--card);border-radius:var(--r);padding:18px;box-shadow:var(--shd);border:1px solid var(--bdr);margin-bottom:14px}
+.card-desc{font-size:11.5px;color:var(--mut);margin-bottom:14px;line-height:1.6}
+.fg{margin-bottom:14px}
+.fg:last-child{margin-bottom:0}
+.flbl{font-size:12px;font-weight:700;color:var(--ch);margin-bottom:6px;display:block}
+.finp{width:100%;padding:11px 13px;border:1.5px solid var(--bdr);border-radius:10px;font-size:13px;color:var(--txt);background:var(--card);outline:none;transition:border-color .15s}
+.finp:focus{border-color:var(--or)}
+.fhint{font-size:10.5px;color:var(--mut);margin-top:5px;line-height:1.5}
+.fgrid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+.stage-block{border:1.5px solid var(--bdr);border-radius:12px;padding:14px;margin-bottom:12px}
+.stage-title{font-size:12.5px;font-weight:800;color:var(--or-d);margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
+.stage-total{font-size:11px;font-weight:700;color:var(--mut);background:var(--card2);padding:3px 10px;border-radius:12px}
+
+.btn-primary{width:100%;padding:14px;border-radius:var(--r);border:none;background:linear-gradient(135deg,var(--or),var(--or-d));color:var(--ch);font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 6px 18px rgba(200,155,0,.35)}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed;box-shadow:none}
+.btn-outline{width:100%;padding:12px;border-radius:10px;border:1.5px solid var(--bdr);background:var(--card);color:var(--txt);font-size:12.5px;font-weight:600;cursor:pointer}
+.btn-outline.danger{border-color:var(--red-b);color:var(--red)}
+
+.rk-table{width:100%;border-collapse:collapse;font-size:12px}
+.rk-table th{text-align:left;font-size:10px;font-weight:800;color:var(--mut);text-transform:uppercase;letter-spacing:.02em;padding:8px;border-bottom:2px solid var(--bdr)}
+.rk-table td{padding:9px 8px;border-bottom:1px solid var(--bdr);color:var(--txt2)}
+.rk-table tr:last-child td{border-bottom:none}
+.rk-table td.num,.rk-table th.num{text-align:right;font-variant-numeric:tabular-nums}
+.rk-table tr.total-row td{font-weight:800;color:var(--ch);border-top:2px solid var(--bdr)}
+.rk-edit-btn{background:var(--or-l);color:var(--or-d);border:1px solid var(--or-b);border-radius:7px;padding:4px 10px;font-size:10.5px;font-weight:700;cursor:pointer}
+
+.status-badge{display:inline-block;font-size:10px;font-weight:700;padding:3px 9px;border-radius:12px;white-space:nowrap}
+.status-belum{background:var(--gry-l);color:var(--mut)}
+.status-pantau{background:var(--amb-l);color:var(--amb)}
+.status-efektif{background:var(--grn-l);color:var(--grn)}
+.status-efektif-terbatas{background:var(--blu-l);color:var(--blu)}
+.status-tidak-efektif{background:var(--red-l);color:var(--red)}
+
+.summary-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+@media(min-width:600px){.summary-grid{grid-template-columns:repeat(4,1fr)}}
+.summary-card{background:var(--card);border-radius:var(--r);padding:14px;box-shadow:var(--shd);border:1px solid var(--bdr);border-left:3px solid var(--or)}
+.summary-val{font-size:22px;font-weight:800;color:var(--ch);line-height:1}
+.summary-lbl{font-size:10px;color:var(--mut);font-weight:600;margin-top:5px}
+
+.chart-box{position:relative;height:240px}
+.funnel-wrap{display:flex;flex-direction:column;gap:12px;padding:6px 0}
+.funnel-row{display:flex;flex-direction:column;gap:5px}
+.funnel-row-top{display:flex;align-items:center;gap:10px}
+.funnel-label{width:88px;flex-shrink:0;font-size:11px;font-weight:600;color:var(--txt2)}
+.funnel-bar-wrap{flex:1;background:var(--card2);border-radius:6px;overflow:hidden;height:26px;display:flex;align-items:center}
+.funnel-bar-split{gap:2px;background:transparent}
+.funnel-bar{height:100%;background:linear-gradient(90deg,var(--or),var(--or-d));border-radius:6px;display:flex;align-items:center;justify-content:flex-end;padding-right:8px;transition:width .3s}
+.funnel-bar span{color:var(--ch);font-size:11px;font-weight:700}
+.funnel-seg{height:100%;border-radius:4px;transition:width .3s}
+.funnel-seg-beli{background:var(--grn)}
+.funnel-seg-lanjut{background:var(--amb)}
+.funnel-seg-arsip{background:var(--red)}
+.funnel-seg-legend{display:flex;gap:16px;padding-left:98px;font-size:10.5px;color:var(--mut)}
+.funnel-seg-legend b{color:var(--txt)}
+.funnel-dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:4px}
+.funnel-dot-beli{background:var(--grn)}
+.funnel-dot-lanjut{background:var(--amb)}
+.funnel-dot-arsip{background:var(--red)}
+
+.funnel-summary-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px;padding-top:14px;border-top:1.5px dashed var(--bdr)}
+.funnel-summary-box{border-radius:12px;padding:14px;text-align:center}
+.funnel-summary-beli{background:var(--grn-l);border:1.5px solid var(--grn-b)}
+.funnel-summary-arsip{background:var(--red-l);border:1.5px solid var(--red-b)}
+.funnel-summary-val{font-size:24px;font-weight:800;color:var(--ch)}
+.funnel-summary-lbl{font-size:11px;font-weight:700;color:var(--txt2);margin-top:2px}
+.funnel-summary-pct{font-size:10px;color:var(--mut);margin-top:4px}
+
+.alert-box{border-radius:12px;padding:14px 16px;margin-bottom:10px;font-size:12.5px;line-height:1.7}
+.alert-box.warn{background:var(--amb-l);border:1.5px solid var(--amb-b);color:#92400E}
+.alert-box.danger{background:var(--red-l);border:1.5px solid var(--red-b);color:#991B1B}
+.alert-box.ok{background:var(--grn-l);border:1.5px solid var(--grn-b);color:#166534}
+.alert-title{font-weight:800;margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.alert-list{margin:0;padding-left:18px}
+.alert-list li{margin-bottom:3px}
+
+.reco-item{border-left:3px solid var(--or);padding:10px 14px;margin-bottom:10px;background:var(--card2);border-radius:0 10px 10px 0}
+.reco-item-title{font-size:12px;font-weight:800;color:var(--or-d);margin-bottom:4px}
+.reco-item-text{font-size:12px;color:var(--txt2);line-height:1.6}
+
+.kesimpulan-box{background:linear-gradient(135deg,var(--ch),var(--ch2));color:#fff;border-radius:var(--r);padding:18px;font-size:13px;line-height:1.9}
+.kesimpulan-box b{color:var(--or-l)}
+
+.overlay{display:none;position:fixed;inset:0;background:rgba(28,30,38,.5);z-index:300;align-items:center;justify-content:center;padding:20px}
+.overlay.show{display:flex}
+.modal{background:var(--bg);width:100%;max-width:420px;border-radius:16px;padding:20px;max-height:85vh;overflow-y:auto}
+.modal-title{font-size:15px;font-weight:800;color:var(--ch);margin-bottom:14px}
+
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--ch);color:#fff;padding:13px 20px;border-radius:12px;font-size:12.5px;font-weight:600;box-shadow:var(--shd2);z-index:999;max-width:90vw;text-align:center;opacity:0;transition:opacity .25s;pointer-events:none}
+.toast.show{opacity:1}
+.empty-note{font-size:12px;color:var(--mut);text-align:center;padding:16px}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="topbar-title">📊 Alat Ukur Performa Script</div>
+    <div class="topbar-sub" style="display:flex;justify-content:space-between;align-items:center">
+      <span>Handling Customer — Kubah Emas</span>
+      <button onclick="openSettings()" style="background:rgba(28,30,38,.1);border:1px solid rgba(28,30,38,.2);color:var(--ch);border-radius:8px;padding:4px 9px;font-size:12px;cursor:pointer">☁️</button>
+    </div>
+    <div class="page-tabs">
+      <button class="page-tab active" id="tab-input" onclick="goToPage('input')">📝 Input Rekap Harian</button>
+      <button class="page-tab" id="tab-dashboard" onclick="goToPage('dashboard')">📊 Dashboard &amp; Evaluasi</button>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- ═══════════ PAGE 1: INPUT REKAP HARIAN ═══════════ -->
+  <div class="page active" id="page-input">
+
+    <div class="card">
+      <div class="fg" style="margin-bottom:0">
+        <label class="flbl">Tanggal Rekap</label>
+        <input class="finp" type="date" id="f-tanggal">
+        <div class="fhint">Otomatis hari ini — bisa diganti kalau mau isi data hari sebelumnya.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="stage-block">
+        <div class="stage-title">A. Script Awal <span class="stage-total">Total Lead: <span id="t-awal">0</span></span></div>
+        <div class="fgrid2">
+          <div class="fg" style="margin-bottom:0"><label class="flbl">Beli Langsung</label><input class="finp" type="number" min="0" step="1" id="f-beli-awal" value="0" oninput="updateTotals()"></div>
+          <div class="fg" style="margin-bottom:0"><label class="flbl">Tidak Beli</label><input class="finp" type="number" min="0" step="1" id="f-tidak-awal" value="0" oninput="updateTotals()"></div>
+        </div>
+        <div class="fg" style="margin-top:10px;margin-bottom:0">
+          <label class="flbl">Alasan Dominan Tidak Beli</label>
+          <select class="finp" id="f-alasan-awal">
+            <option value="">— Pilih alasan —</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="stage-block">
+        <div class="stage-title">B. Follow Up 1 <span class="stage-total">Total FU1: <span id="t-fu1">0</span></span></div>
+        <div class="fgrid2">
+          <div class="fg" style="margin-bottom:0"><label class="flbl">Beli setelah FU1</label><input class="finp" type="number" min="0" step="1" id="f-beli-fu1" value="0" oninput="updateTotals()"></div>
+          <div class="fg" style="margin-bottom:0"><label class="flbl">Tidak Beli setelah FU1</label><input class="finp" type="number" min="0" step="1" id="f-tidak-fu1" value="0" oninput="updateTotals()"></div>
+        </div>
+        <div class="fg" style="margin-top:10px;margin-bottom:0">
+          <label class="flbl">Alasan Dominan Tidak Beli</label>
+          <select class="finp" id="f-alasan-fu1">
+            <option value="">— Pilih alasan —</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="stage-block">
+        <div class="stage-title">C. Follow Up 2 <span class="stage-total">Total FU2: <span id="t-fu2">0</span></span></div>
+        <div class="fgrid2">
+          <div class="fg" style="margin-bottom:0"><label class="flbl">Beli setelah FU2</label><input class="finp" type="number" min="0" step="1" id="f-beli-fu2" value="0" oninput="updateTotals()"></div>
+          <div class="fg" style="margin-bottom:0"><label class="flbl">Tidak Beli setelah FU2</label><input class="finp" type="number" min="0" step="1" id="f-tidak-fu2" value="0" oninput="updateTotals()"></div>
+        </div>
+        <div class="fg" style="margin-top:10px;margin-bottom:0">
+          <label class="flbl">Alasan Dominan Tidak Beli</label>
+          <select class="finp" id="f-alasan-fu2">
+            <option value="">— Pilih alasan —</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="stage-block" style="margin-bottom:0">
+        <div class="stage-title">D. Follow Up 3 <span class="stage-total">Total FU3: <span id="t-fu3">0</span></span></div>
+        <div class="fgrid2">
+          <div class="fg" style="margin-bottom:0"><label class="flbl">Beli setelah FU3</label><input class="finp" type="number" min="0" step="1" id="f-beli-fu3" value="0" oninput="updateTotals()"></div>
+          <div class="fg" style="margin-bottom:0"><label class="flbl">Tidak Beli / Masuk Arsip</label><input class="finp" type="number" min="0" step="1" id="f-tidak-fu3" value="0" oninput="updateTotals()"></div>
+        </div>
+        <div class="fg" style="margin-top:10px;margin-bottom:0">
+          <label class="flbl">Alasan Dominan Tidak Beli</label>
+          <select class="finp" id="f-alasan-fu3">
+            <option value="">— Pilih alasan —</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn-primary" id="btn-simpan" onclick="submitRekap(false)">💾 SIMPAN REKAP HARIAN</button>
+    <div style="height:8px"></div>
+    <button class="btn-outline" id="btn-batal-edit" onclick="cancelEdit()" style="display:none">✕ Batal Edit</button>
+
+    <div class="section-title">Riwayat Rekap Harian</div>
+    <div class="card">
+      <div class="fg">
+        <input class="finp" type="text" id="riwayat-search" placeholder="Cari berdasarkan tanggal (YYYY-MM-DD)..." oninput="renderRiwayat()">
+      </div>
+      <div style="overflow-x:auto">
+        <table class="rk-table" id="riwayatTable"></table>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ═══════════ PAGE 2: DASHBOARD & EVALUASI ═══════════ -->
+  <div class="page" id="page-dashboard">
+
+    <div class="card">
+      <div class="fg" style="margin-bottom:0">
+        <label class="flbl">Filter Periode</label>
+        <select class="finp" id="periodSelect" onchange="onPeriodChange()">
+          <option value="today">Hari ini</option>
+          <option value="week" selected>Minggu ini</option>
+          <option value="month">Bulan ini</option>
+          <option value="year">Tahun ini</option>
+          <option value="custom">Pilih periode sendiri...</option>
+        </select>
+      </div>
+      <div class="fgrid2" id="customDateRow" style="display:none;margin-top:10px">
+        <div class="fg" style="margin-bottom:0"><label class="flbl">Dari</label><input class="finp" type="date" id="dateFrom"></div>
+        <div class="fg" style="margin-bottom:0"><label class="flbl">Sampai</label><input class="finp" type="date" id="dateTo"></div>
+      </div>
+      <button class="btn-outline" style="margin-top:10px" onclick="renderDashboard()">🔄 Terapkan</button>
+      <div class="fhint" id="periodLabel" style="margin-top:8px"></div>
+    </div>
+
+    <div class="section-title">B. Kartu Ringkasan</div>
+    <div class="summary-grid" style="margin-bottom:20px">
+      <div class="summary-card"><div class="summary-val" id="s-lead">—</div><div class="summary-lbl">Total Lead Masuk</div></div>
+      <div class="summary-card"><div class="summary-val" id="s-beli">—</div><div class="summary-lbl">Total Pembelian</div></div>
+      <div class="summary-card"><div class="summary-val" id="s-konversi">—</div><div class="summary-lbl">Konversi Keseluruhan</div></div>
+      <div class="summary-card"><div class="summary-val" id="s-arsip">—</div><div class="summary-lbl">Total Arsip</div></div>
+      <div class="summary-card"><div class="summary-val" id="s-beli-awal">—</div><div class="summary-lbl">Beli Langsung</div></div>
+      <div class="summary-card"><div class="summary-val" id="s-beli-fu1">—</div><div class="summary-lbl">Beli Setelah FU1</div></div>
+      <div class="summary-card"><div class="summary-val" id="s-beli-fu2">—</div><div class="summary-lbl">Beli Setelah FU2</div></div>
+      <div class="summary-card"><div class="summary-val" id="s-beli-fu3">—</div><div class="summary-lbl">Beli Setelah FU3</div></div>
+    </div>
+
+    <div class="section-title">Customer Journey</div>
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-desc">Corong konsumen dari lead masuk sampai ke tahap akhir (Arsip)</div>
+      <div class="funnel-wrap" id="funnelChart"></div>
+      <div class="funnel-summary-row" id="funnelSummary"></div>
+    </div>
+
+    <div class="section-title">Grafik Konversi per Tahap</div>
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-desc">Batang = konversi aktual, garis putus = target</div>
+      <div class="chart-box"><canvas id="konversiChart"></canvas></div>
+    </div>
+
+    <div class="section-title">E. Tabel Efektivitas per Tahap</div>
+    <div class="card" style="margin-bottom:20px">
+      <div style="overflow-x:auto"><table class="rk-table" id="efektivitasTable"></table></div>
+      <button class="btn-outline" style="margin-top:12px" onclick="openTargetModal()">⚙️ Pengaturan Target</button>
+    </div>
+
+    <div class="section-title">Peringatan Otomatis</div>
+    <div id="alertBox" style="margin-bottom:20px"></div>
+
+    <div class="section-title">Rekomendasi Otomatis</div>
+    <div id="recoBox" style="margin-bottom:20px"></div>
+
+    <div class="section-title">Kesimpulan Periode</div>
+    <div class="kesimpulan-box" id="kesimpulanBox"></div>
+
+  </div>
+
+</div>
+
+<!-- MODAL: KONFIRMASI TIMPA DATA -->
+<div class="overlay" id="overwriteOverlay">
+  <div class="modal">
+    <div class="modal-title" id="overwriteTitle">Rekap tanggal ini sudah tersedia.</div>
+    <p style="font-size:12.5px;color:var(--txt2);margin-bottom:16px;line-height:1.6">Data buat tanggal ini udah pernah diisi sebelumnya. Mau ditimpa dengan angka yang baru barusan lu masukin?</p>
+    <div class="fgrid2">
+      <button class="btn-outline" onclick="closeOverwriteModal()">Batal</button>
+      <button class="btn-primary" onclick="confirmOverwrite()">Perbarui Data</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: PENGATURAN TARGET -->
+<div class="overlay" id="targetOverlay">
+  <div class="modal">
+    <div class="modal-title">⚙️ Pengaturan Target Konversi</div>
+    <div class="fg"><label class="flbl">Target Script Awal (%)</label><input class="finp" type="number" min="0" max="100" step="0.1" id="target-awal"></div>
+    <div class="fg"><label class="flbl">Target FU1 (%)</label><input class="finp" type="number" min="0" max="100" step="0.1" id="target-fu1"></div>
+    <div class="fg"><label class="flbl">Target FU2 (%)</label><input class="finp" type="number" min="0" max="100" step="0.1" id="target-fu2"></div>
+    <div class="fg" style="margin-bottom:16px"><label class="flbl">Target FU3 (%)</label><input class="finp" type="number" min="0" max="100" step="0.1" id="target-fu3"></div>
+    <div class="fgrid2">
+      <button class="btn-outline" onclick="closeTargetModal()">Batal</button>
+      <button class="btn-primary" onclick="saveTargets()">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: CLOUD BACKUP -->
+<div class="overlay" id="settingsOverlay">
+  <div class="modal">
+    <div class="modal-title">☁️ Cloud Backup</div>
+    <div id="cloudStatusBox"></div>
+    <div class="fhint" style="margin-bottom:14px">Yang di-backup: rekap harian yang gagal terkirim ke Sheet (misal pas gak ada sinyal), biar gak hilang meski HP di-clear cache.</div>
+    <button class="btn-outline" onclick="syncToCloud(true)" style="margin-bottom:8px">🔄 Sync Sekarang</button>
+    <button class="btn-outline" onclick="restoreFromCloud(true)" style="margin-bottom:8px">⬇️ Pulihkan dari Cloud</button>
+    <button class="btn-outline" onclick="closeSettings()">Tutup</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════════════════
+// CONFIG
+// ══════════════════════════════════════════════════════
+const CONFIG = {
+  apps_script_url: 'https://script.google.com/macros/s/AKfycbx4x1ssQ_TnDUGRmzoHbt7bIjkxI7myHKvoTAStAjBcxPXQ5qCbVT9iCVZzQcPGFYOa/exec',
+  token: 'Script',
+  sheet_id: '1MlQ9rZOHOIMBPxDbgctQM5ofgBUnAovR2v7v8kPQrzM',
+  sheet_rekap: 'Rekap Harian',
+};
+
+const ALASAN_LIST = [
+  'Tidak merespons','Harga terlalu tinggi','Menunggu dana','Masih membandingkan',
+  'Belum membutuhkan','Menunggu keputusan keluarga','Sudah membeli di tempat lain',
+  'Produk tidak sesuai','Lainnya'
+];
+
+const STAGE_LABELS = { awal:'Script Awal', fu1:'Follow Up 1', fu2:'Follow Up 2', fu3:'Follow Up 3' };
+const DEFAULT_TARGETS = { awal:20, fu1:15, fu2:10, fu3:5 };
+
+function ls(k,d){ try{const v=localStorage.getItem(k);return v!==null?JSON.parse(v):d;}catch(e){return d;} }
+function ss(k,v){ try{localStorage.setItem(k,JSON.stringify(v));}catch(e){} }
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function toast(msg, dur=2800){
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  clearTimeout(window._toastTimer);
+  window._toastTimer = setTimeout(()=>el.classList.remove('show'), dur);
+}
+function isConfigured(){
+  return CONFIG.sheet_id && CONFIG.sheet_id.indexOf('GANTI_')!==0 &&
+         CONFIG.apps_script_url && CONFIG.apps_script_url.indexOf('GANTI_')!==0;
+}
+function todayStr(){
+  const d=new Date();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+
+// ══════════════════════════════════════════════════════
+// NAVIGASI 2 HALAMAN
+// ══════════════════════════════════════════════════════
+function goToPage(page){
+  document.getElementById('page-input').classList.toggle('active', page==='input');
+  document.getElementById('page-dashboard').classList.toggle('active', page==='dashboard');
+  document.getElementById('tab-input').classList.toggle('active', page==='input');
+  document.getElementById('tab-dashboard').classList.toggle('active', page==='dashboard');
+  if(page==='dashboard') renderDashboard();
+  window.scrollTo(0,0);
+}
+
+function populateAlasanSelects(){
+  ['f-alasan-awal','f-alasan-fu1','f-alasan-fu2','f-alasan-fu3'].forEach(id=>{
+    const sel = document.getElementById(id);
+    ALASAN_LIST.forEach(a=>{
+      const opt = document.createElement('option');
+      opt.value = a; opt.textContent = a;
+      sel.appendChild(opt);
+    });
+  });
+}
+
+// ══════════════════════════════════════════════════════
+// TOTAL OTOMATIS PER TAHAP
+// ══════════════════════════════════════════════════════
+function nval(id){ const v=parseInt(document.getElementById(id).value,10); return isNaN(v)?0:v; }
+function updateTotals(){
+  document.getElementById('t-awal').textContent = nval('f-beli-awal')+nval('f-tidak-awal');
+  document.getElementById('t-fu1').textContent = nval('f-beli-fu1')+nval('f-tidak-fu1');
+  document.getElementById('t-fu2').textContent = nval('f-beli-fu2')+nval('f-tidak-fu2');
+  document.getElementById('t-fu3').textContent = nval('f-beli-fu3')+nval('f-tidak-fu3');
+}
+
+// ══════════════════════════════════════════════════════
+// GVIZ READ
+// ══════════════════════════════════════════════════════
+function gviz(sheetId, sheetName, range){
+  return new Promise((resolve,reject)=>{
+    const cb = 'gvizCb_'+Math.random().toString(36).slice(2);
+    const timeout = setTimeout(()=>{ cleanup(); reject(new Error('timeout')); }, 12000);
+    function cleanup(){ clearTimeout(timeout); delete window[cb]; if(sc.parentNode) sc.parentNode.removeChild(sc); }
+    window[cb] = (resp)=>{ cleanup(); resolve(resp && resp.table ? resp.table : {rows:[]}); };
+    const sc = document.createElement('script');
+    sc.src = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json;responseHandler:${cb}&sheet=${encodeURIComponent(sheetName)}&range=${range}&headers=0&cb=${Date.now()}`;
+    sc.onerror = ()=>{ cleanup(); reject(new Error('gagal load sheet')); };
+    document.head.appendChild(sc);
+  });
+}
+function gv(cell){ return cell ? cell.v : ''; }
+function gvDate(cell){
+  const v = gv(cell);
+  if(v===null||v===undefined||v==='') return '';
+  const s = String(v);
+  const m = s.match(/^Date\((\d+),(\d+),(\d+)/);
+  if(m) return m[1]+'-'+String(parseInt(m[2],10)+1).padStart(2,'0')+'-'+String(parseInt(m[3],10)).padStart(2,'0');
+  return s.slice(0,10);
+}
+
+// ══════════════════════════════════════════════════════
+// RIWAYAT REKAP HARIAN
+// ══════════════════════════════════════════════════════
+let ALL_REKAP = [];
+async function loadAllRekap(){
+  if(!isConfigured()) return;
+  try{
+    const t = await gviz(CONFIG.sheet_id, CONFIG.sheet_rekap, 'A2:N');
+    ALL_REKAP = (t.rows||[]).map(r=>{
+      const c = r.c||[];
+      return {
+        tanggal: gvDate(c[0]),
+        beliAwal: Number(gv(c[1]))||0, tidakAwal: Number(gv(c[2]))||0,
+        beliFu1: Number(gv(c[3]))||0, tidakFu1: Number(gv(c[4]))||0,
+        beliFu2: Number(gv(c[5]))||0, tidakFu2: Number(gv(c[6]))||0,
+        beliFu3: Number(gv(c[7]))||0, tidakFu3: Number(gv(c[8]))||0,
+        alasanAwal: gv(c[9]), alasanFu1: gv(c[10]), alasanFu2: gv(c[11]), alasanFu3: gv(c[12]),
+      };
+    }).filter(r=>r.tanggal);
+    ALL_REKAP.sort((a,b)=>b.tanggal.localeCompare(a.tanggal));
+    renderRiwayat();
+  }catch(e){
+    document.getElementById('riwayatTable').innerHTML = '<tr><td class="empty-note">❌ Gagal memuat riwayat: '+esc(e.message)+'</td></tr>';
+  }
+}
+
+function renderRiwayat(){
+  const q = (document.getElementById('riwayat-search').value||'').trim();
+  const list = q ? ALL_REKAP.filter(r=>r.tanggal.includes(q)) : ALL_REKAP;
+  const table = document.getElementById('riwayatTable');
+  if(list.length===0){
+    table.innerHTML = '<tr><td class="empty-note">Belum ada rekap tersimpan.</td></tr>';
+    return;
+  }
+  let html = '<tr><th>Tanggal</th><th class="num">Total Lead</th><th class="num">Beli Awal</th><th class="num">Beli FU1</th><th class="num">Beli FU2</th><th class="num">Beli FU3</th><th class="num">Arsip</th><th>Aksi</th></tr>';
+  list.forEach(r=>{
+    const totalLead = r.beliAwal+r.tidakAwal;
+    html += `<tr>
+      <td>${esc(r.tanggal)}</td>
+      <td class="num">${totalLead}</td>
+      <td class="num">${r.beliAwal}</td>
+      <td class="num">${r.beliFu1}</td>
+      <td class="num">${r.beliFu2}</td>
+      <td class="num">${r.beliFu3}</td>
+      <td class="num">${r.tidakFu3}</td>
+      <td><button class="rk-edit-btn" onclick="loadForEdit('${esc(r.tanggal)}')">Edit</button></td>
+    </tr>`;
+  });
+  table.innerHTML = html;
+}
+
+let EDITING_DATE = null;
+function loadForEdit(tanggal){
+  const r = ALL_REKAP.find(x=>x.tanggal===tanggal);
+  if(!r) return;
+  EDITING_DATE = tanggal;
+  document.getElementById('f-tanggal').value = tanggal;
+  document.getElementById('f-beli-awal').value = r.beliAwal;
+  document.getElementById('f-tidak-awal').value = r.tidakAwal;
+  document.getElementById('f-beli-fu1').value = r.beliFu1;
+  document.getElementById('f-tidak-fu1').value = r.tidakFu1;
+  document.getElementById('f-beli-fu2').value = r.beliFu2;
+  document.getElementById('f-tidak-fu2').value = r.tidakFu2;
+  document.getElementById('f-beli-fu3').value = r.beliFu3;
+  document.getElementById('f-tidak-fu3').value = r.tidakFu3;
+  document.getElementById('f-alasan-awal').value = r.alasanAwal||'';
+  document.getElementById('f-alasan-fu1').value = r.alasanFu1||'';
+  document.getElementById('f-alasan-fu2').value = r.alasanFu2||'';
+  document.getElementById('f-alasan-fu3').value = r.alasanFu3||'';
+  updateTotals();
+  document.getElementById('btn-simpan').textContent = '💾 PERBARUI REKAP ('+tanggal+')';
+  document.getElementById('btn-batal-edit').style.display = 'block';
+  goToPage('input');
+  window.scrollTo(0,0);
+  toast('✏️ Mode edit — mengubah data tanggal '+tanggal);
+}
+function cancelEdit(){
+  EDITING_DATE = null;
+  resetForm();
+  document.getElementById('btn-simpan').textContent = '💾 SIMPAN REKAP HARIAN';
+  document.getElementById('btn-batal-edit').style.display = 'none';
+}
+function resetForm(){
+  document.getElementById('f-tanggal').value = todayStr();
+  ['f-beli-awal','f-tidak-awal','f-beli-fu1','f-tidak-fu1','f-beli-fu2','f-tidak-fu2','f-beli-fu3','f-tidak-fu3'].forEach(id=>document.getElementById(id).value=0);
+  ['f-alasan-awal','f-alasan-fu1','f-alasan-fu2','f-alasan-fu3'].forEach(id=>document.getElementById(id).value='');
+  updateTotals();
+}
+
+// ══════════════════════════════════════════════════════
+// SUBMIT REKAP
+// ══════════════════════════════════════════════════════
+function buildRekapPayload(){
+  return {
+    action: 'save_rekap',
+    token: CONFIG.token,
+    tanggal: document.getElementById('f-tanggal').value,
+    beli_langsung: nval('f-beli-awal'), tidak_beli_awal: nval('f-tidak-awal'),
+    beli_fu1: nval('f-beli-fu1'), tidak_beli_fu1: nval('f-tidak-fu1'),
+    beli_fu2: nval('f-beli-fu2'), tidak_beli_fu2: nval('f-tidak-fu2'),
+    beli_fu3: nval('f-beli-fu3'), tidak_beli_fu3: nval('f-tidak-fu3'),
+    alasan_awal: document.getElementById('f-alasan-awal').value,
+    alasan_fu1: document.getElementById('f-alasan-fu1').value,
+    alasan_fu2: document.getElementById('f-alasan-fu2').value,
+    alasan_fu3: document.getElementById('f-alasan-fu3').value,
+  };
+}
+function validateRekap(){
+  const tgl = document.getElementById('f-tanggal').value;
+  if(!tgl){ toast('⚠️ Tanggal wajib diisi.'); return false; }
+  const ids = ['f-beli-awal','f-tidak-awal','f-beli-fu1','f-tidak-fu1','f-beli-fu2','f-tidak-fu2','f-beli-fu3','f-tidak-fu3'];
+  let total=0;
+  for(const id of ids){
+    const raw = document.getElementById(id).value;
+    const n = Number(raw);
+    if(raw===''||isNaN(n)||n<0||Math.floor(n)!==n){ toast('⚠️ Semua kolom angka harus diisi angka bulat, gak boleh negatif.'); return false; }
+    total+=n;
+  }
+  if(total===0){ toast('⚠️ Rekap kosong gak bisa disimpan — isi minimal salah satu angka.'); return false; }
+  return true;
+}
+async function submitRekap(confirmOverwrite){
+  if(!validateRekap()) return;
+  const payload = buildRekapPayload();
+  if(confirmOverwrite) payload.confirm_overwrite = true;
+  else if(EDITING_DATE===payload.tanggal) payload.confirm_overwrite = true; // mode edit eksplisit, gak perlu tanya lagi
+
+  if(!isConfigured()){ toast('⚠️ Apps Script belum terhubung.'); return; }
+
+  const btn = document.getElementById('btn-simpan');
+  btn.disabled = true; const oldText = btn.textContent; btn.textContent = 'Menyimpan...';
+  try{
+    const res = await fetch(CONFIG.apps_script_url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)}).then(r=>r.json());
+    btn.disabled = false; btn.textContent = oldText;
+    if(res.status==='exists'){
+      pendingOverwritePayload = payload;
+      document.getElementById('overwriteTitle').textContent = 'Rekap tanggal '+payload.tanggal+' sudah tersedia.';
+      document.getElementById('overwriteOverlay').classList.add('show');
+      return;
+    }
+    if(res.status==='ok'){
+      toast(res.updated ? '✅ Rekap berhasil diperbarui.' : '✅ Rekap berhasil disimpan.');
+      cancelEdit();
+      loadAllRekap();
+    } else {
+      toast('❌ Gagal simpan: '+(res.message||'unknown error'), 4000);
+    }
+  }catch(e){
+    btn.disabled = false; btn.textContent = oldText;
+    savePendingDraft(payload);
+    toast('⚠️ Gagal konek ke server. Rekap tersimpan draft lokal — coba "Sync Sekarang" di ☁️ Cloud Backup nanti.', 4500);
+  }
+}
+let pendingOverwritePayload = null;
+function closeOverwriteModal(){ document.getElementById('overwriteOverlay').classList.remove('show'); pendingOverwritePayload=null; }
+function confirmOverwrite(){
+  document.getElementById('overwriteOverlay').classList.remove('show');
+  if(pendingOverwritePayload) submitRekap(true);
+}
+
+// ══════════════════════════════════════════════════════
+// DASHBOARD & EVALUASI
+// ══════════════════════════════════════════════════════
+function onPeriodChange(){
+  const v = document.getElementById('periodSelect').value;
+  document.getElementById('customDateRow').style.display = (v==='custom') ? 'grid' : 'none';
+  if(v!=='custom') renderDashboard();
+}
+function getPeriodRange(){
+  const v = document.getElementById('periodSelect').value;
+  const now = new Date(); now.setHours(0,0,0,0);
+  const today = todayStr();
+  const dstr = d => d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  if(v==='today') return {from:today,to:today,label:'Hari ini ('+today+')'};
+  if(v==='week'){
+    const day = now.getDay(); const diff = day===0?-6:1-day;
+    const from = new Date(now); from.setDate(from.getDate()+diff);
+    return {from:dstr(from),to:today,label:'Minggu ini ('+dstr(from)+' – '+today+')'};
+  }
+  if(v==='month'){
+    const from = new Date(now.getFullYear(),now.getMonth(),1);
+    return {from:dstr(from),to:today,label:'Bulan ini ('+dstr(from)+' – '+today+')'};
+  }
+  if(v==='year'){
+    const from = new Date(now.getFullYear(),0,1);
+    return {from:dstr(from),to:today,label:'Tahun ini ('+dstr(from)+' – '+today+')'};
+  }
+  const from = document.getElementById('dateFrom').value || today;
+  const to = document.getElementById('dateTo').value || today;
+  return {from,to,label:'Custom: '+from+' – '+to};
+}
+// Ambil rentang periode SEBELUMNYA dengan panjang yang sama, buat
+// bandingin "meningkat/menurun dari periode sebelumnya".
+function getPreviousRange(from,to){
+  const d1 = new Date(from+'T00:00:00'), d2 = new Date(to+'T00:00:00');
+  const lenDays = Math.round((d2-d1)/86400000)+1;
+  const prevTo = new Date(d1); prevTo.setDate(prevTo.getDate()-1);
+  const prevFrom = new Date(prevTo); prevFrom.setDate(prevFrom.getDate()-(lenDays-1));
+  const dstr = d => d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  return {from:dstr(prevFrom),to:dstr(prevTo)};
+}
+
+function getTargets(){
+  return ls('au_targets', DEFAULT_TARGETS);
+}
+
+let konversiChartInstance = null;
+function renderDashboard(){
+  const {from,to,label} = getPeriodRange();
+  document.getElementById('periodLabel').textContent = 'Menampilkan periode: '+label;
+  const rows = ALL_REKAP.filter(r=>r.tanggal>=from && r.tanggal<=to);
+
+  const totLead = rows.reduce((s,r)=>s+r.beliAwal+r.tidakAwal,0);
+  const totBeliAwal = rows.reduce((s,r)=>s+r.beliAwal,0);
+  const totTidakAwal = rows.reduce((s,r)=>s+r.tidakAwal,0);
+  const totFu1 = rows.reduce((s,r)=>s+r.beliFu1+r.tidakFu1,0);
+  const totBeliFu1 = rows.reduce((s,r)=>s+r.beliFu1,0);
+  const totTidakFu1 = rows.reduce((s,r)=>s+r.tidakFu1,0);
+  const totFu2 = rows.reduce((s,r)=>s+r.beliFu2+r.tidakFu2,0);
+  const totBeliFu2 = rows.reduce((s,r)=>s+r.beliFu2,0);
+  const totTidakFu2 = rows.reduce((s,r)=>s+r.tidakFu2,0);
+  const totFu3 = rows.reduce((s,r)=>s+r.beliFu3+r.tidakFu3,0);
+  const totBeliFu3 = rows.reduce((s,r)=>s+r.beliFu3,0);
+  const totArsip = rows.reduce((s,r)=>s+r.tidakFu3,0);
+
+  const totBeli = totBeliAwal+totBeliFu1+totBeliFu2+totBeliFu3;
+  const konversiKeseluruhan = totLead>0 ? (totBeli/totLead*100) : 0;
+
+  document.getElementById('s-lead').textContent = totLead;
+  document.getElementById('s-beli').textContent = totBeli;
+  document.getElementById('s-konversi').textContent = konversiKeseluruhan.toFixed(1)+'%';
+  document.getElementById('s-arsip').textContent = totArsip;
+  document.getElementById('s-beli-awal').textContent = totBeliAwal;
+  document.getElementById('s-beli-fu1').textContent = totBeliFu1;
+  document.getElementById('s-beli-fu2').textContent = totBeliFu2;
+  document.getElementById('s-beli-fu3').textContent = totBeliFu3;
+
+  // ── Customer Journey Funnel ──
+  // Tiap tahap dipecah 2 warna: hijau = Beli (keluar dari journey lewat
+  // ujung "beli"), kuning = Lanjut ke tahap berikutnya, merah = Arsip
+  // (ujung "gak beli" yang final, cuma di baris FU3). Lebar bar dihitung
+  // relatif ke Total Lead (baris paling atas), biar keliatan corongnya
+  // ngecil beneran tiap tahap.
+  const maxVal = Math.max(1, totLead);
+  function funnelSegRow(label, beliVal, lanjutVal, lanjutLabel, lanjutColorClass){
+    const pctBeli = Math.round(beliVal/maxVal*100);
+    const pctLanjut = Math.round(lanjutVal/maxVal*100);
+    return `<div class="funnel-row">
+      <div class="funnel-row-top">
+        <div class="funnel-label">${label}</div>
+        <div class="funnel-bar-wrap funnel-bar-split">
+          ${beliVal>0?`<div class="funnel-seg funnel-seg-beli" style="width:${Math.max(pctBeli,3)}%"></div>`:''}
+          ${lanjutVal>0?`<div class="funnel-seg ${lanjutColorClass}" style="width:${Math.max(pctLanjut,3)}%"></div>`:''}
+        </div>
+      </div>
+      <div class="funnel-seg-legend">
+        <span><span class="funnel-dot funnel-dot-beli"></span>Beli: <b>${beliVal}</b></span>
+        <span><span class="funnel-dot ${lanjutColorClass==='funnel-seg-arsip'?'funnel-dot-arsip':'funnel-dot-lanjut'}"></span>${lanjutLabel}: <b>${lanjutVal}</b></span>
+      </div>
+    </div>`;
+  }
+
+  let funnelHtml = `<div class="funnel-row">
+    <div class="funnel-row-top">
+      <div class="funnel-label">Total Lead</div>
+      <div class="funnel-bar-wrap"><div class="funnel-bar" style="width:100%"><span>${totLead}</span></div></div>
+    </div>
+  </div>`;
+  funnelHtml += funnelSegRow('Script Awal', totBeliAwal, totTidakAwal, 'Lanjut FU1', 'funnel-seg-lanjut');
+  funnelHtml += funnelSegRow('Follow Up 1', totBeliFu1, totTidakFu1, 'Lanjut FU2', 'funnel-seg-lanjut');
+  funnelHtml += funnelSegRow('Follow Up 2', totBeliFu2, totTidakFu2, 'Lanjut FU3', 'funnel-seg-lanjut');
+  funnelHtml += funnelSegRow('Follow Up 3', totBeliFu3, totArsip, 'Arsip', 'funnel-seg-arsip');
+  document.getElementById('funnelChart').innerHTML = funnelHtml;
+
+  // Ringkasan akhir: ke mana ujung-ujungnya journey ini berakhir —
+  // dibeli, atau berujung Arsip. Ini jawaban cepat tanpa perlu jumlahin
+  // manual dari 4 baris di atas.
+  const totalUjung = totBeli + totArsip;
+  const pctBeliUjung = totalUjung>0 ? Math.round(totBeli/totalUjung*100) : 0;
+  const pctArsipUjung = totalUjung>0 ? 100-pctBeliUjung : 0;
+  document.getElementById('funnelSummary').innerHTML = `
+    <div class="funnel-summary-box funnel-summary-beli">
+      <div class="funnel-summary-val">${totBeli}</div>
+      <div class="funnel-summary-lbl">Total Beli</div>
+      <div class="funnel-summary-pct">${pctBeliUjung}% dari hasil akhir</div>
+    </div>
+    <div class="funnel-summary-box funnel-summary-arsip">
+      <div class="funnel-summary-val">${totArsip}</div>
+      <div class="funnel-summary-lbl">Total Arsip</div>
+      <div class="funnel-summary-pct">${pctArsipUjung}% dari hasil akhir</div>
+    </div>`;
+
+  // ── Data per tahap (dipakai bareng chart + tabel + alert + reco) ──
+  const targets = getTargets();
+  const stageData = {
+    awal: {label:'Script Awal', total:totLead, beli:totBeliAwal, tidak:totTidakAwal, target:targets.awal},
+    fu1:  {label:'FU 1', total:totFu1, beli:totBeliFu1, tidak:totTidakFu1, target:targets.fu1},
+    fu2:  {label:'FU 2', total:totFu2, beli:totBeliFu2, tidak:totTidakFu2, target:targets.fu2},
+    fu3:  {label:'FU 3', total:totFu3, beli:totBeliFu3, tidak:totTidakFu3, target:targets.fu3},
+  };
+  Object.keys(stageData).forEach(k=>{
+    const s = stageData[k];
+    s.konversi = s.total>0 ? (s.beli/s.total*100) : 0;
+    s.status = computeStatus(s.total, s.konversi, s.target);
+  });
+
+  renderKonversiChart(stageData);
+  renderEfektivitasTable(stageData);
+  renderAlerts(stageData, rows, from, to, totArsip);
+  renderRekomendasi(rows);
+  renderKesimpulan(stageData, rows);
+}
+
+// ══════════════════════════════════════════════════════
+// STATUS OTOMATIS PER TAHAP
+// ══════════════════════════════════════════════════════
+const STATUS_META = {
+  belum_cukup:      {label:'Belum Cukup Data',        cls:'status-belum'},
+  perlu_pantau:     {label:'Perlu Dipantau',           cls:'status-pantau'},
+  efektif:          {label:'Efektif',                  cls:'status-efektif'},
+  efektif_terbatas: {label:'Efektif (Data Terbatas)',  cls:'status-efektif-terbatas'},
+  tidak_efektif:    {label:'Tidak Efektif',             cls:'status-tidak-efektif'},
+};
+function computeStatus(n, konversiPct, targetPct){
+  if(n<10) return 'belum_cukup';
+  if(n>=20) return konversiPct>=targetPct ? 'efektif' : 'tidak_efektif';
+  return konversiPct>=targetPct ? 'efektif_terbatas' : 'perlu_pantau';
+}
+
+function renderEfektivitasTable(stageData){
+  let html = '<tr><th>Tahap</th><th class="num">Total Dilayani</th><th class="num">Beli</th><th class="num">Tidak Beli/Arsip</th><th class="num">Konversi</th><th class="num">Target</th><th>Status</th></tr>';
+  Object.values(stageData).forEach(s=>{
+    const meta = STATUS_META[s.status];
+    html += `<tr>
+      <td>${s.label}</td>
+      <td class="num">${s.total}</td>
+      <td class="num">${s.beli}</td>
+      <td class="num">${s.tidak}</td>
+      <td class="num">${s.konversi.toFixed(1)}%</td>
+      <td class="num">${s.target}%</td>
+      <td><span class="status-badge ${meta.cls}">${meta.label}</span></td>
+    </tr>`;
+  });
+  document.getElementById('efektivitasTable').innerHTML = html;
+}
+
+function renderKonversiChart(stageData){
+  const ctx = document.getElementById('konversiChart');
+  const labels = Object.values(stageData).map(s=>s.label);
+  const aktual = Object.values(stageData).map(s=>+s.konversi.toFixed(1));
+  const target = Object.values(stageData).map(s=>s.target);
+  if(konversiChartInstance) konversiChartInstance.destroy();
+  konversiChartInstance = new Chart(ctx,{
+    type:'bar',
+    data:{labels, datasets:[
+      {type:'bar', label:'Konversi Aktual (%)', data:aktual, backgroundColor:'#C89B00', borderRadius:5, barThickness:34},
+      {type:'line', label:'Target (%)', data:target, borderColor:'#1C1E26', borderDash:[6,4], borderWidth:2, pointRadius:3, pointBackgroundColor:'#1C1E26', fill:false, tension:0}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:true,position:'top',labels:{font:{size:10.5,family:'Poppins'}}}},
+      scales:{y:{beginAtZero:true,ticks:{font:{size:10.5,family:'Poppins'},callback:v=>v+'%'}},
+              x:{ticks:{font:{size:10.5,family:'Poppins'}}}}}
+  });
+}
+
+// ══════════════════════════════════════════════════════
+// PERINGATAN OTOMATIS
+// ══════════════════════════════════════════════════════
+function dominantAlasan(rows, field){
+  const counts={};
+  rows.forEach(r=>{ if(r[field]) counts[r[field]]=(counts[r[field]]||0)+1; });
+  const keys=Object.keys(counts).sort((a,b)=>counts[b]-counts[a]);
+  return keys.length ? keys[0] : null;
+}
+function renderAlerts(stageData, rows, from, to, totArsip){
+  const box = document.getElementById('alertBox');
+  let html = '';
+
+  // Cari tahap paling bermasalah (Tidak Efektif, gap terbesar dari target)
+  const tidakEfektifStages = Object.entries(stageData).filter(([k,s])=>s.status==='tidak_efektif');
+  if(tidakEfektifStages.length){
+    tidakEfektifStages.sort((a,b)=>(b[1].target-b[1].konversi)-(a[1].target-a[1].konversi));
+    const [key,s] = tidakEfektifStages[0];
+    const alasanField = {awal:'alasanAwal',fu1:'alasanFu1',fu2:'alasanFu2',fu3:'alasanFu3'}[key];
+    const dom = dominantAlasan(rows, alasanField);
+    html += `<div class="alert-box danger">
+      <div class="alert-title">⚠️ PERINGATAN — Script ${s.label} tidak efektif</div>
+      Total ${s.label}&nbsp;&nbsp;&nbsp;: <b>${s.total}</b><br>
+      Berhasil membeli&nbsp;&nbsp;: <b>${s.beli}</b><br>
+      Tidak membeli&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <b>${s.tidak}</b><br>
+      Konversi aktual&nbsp;&nbsp;: <b>${s.konversi.toFixed(1)}%</b><br>
+      Target&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <b>${s.target}%</b>
+      ${dom?`<br><br>Alasan dominan: <b>${esc(dom)}</b>`:''}
+    </div>`;
+  }
+
+  // Peringatan lain-lain
+  const lain = [];
+  if(stageData.awal.status==='tidak_efektif' && (!tidakEfektifStages.length || tidakEfektifStages[0][0]!=='awal'))
+    lain.push('Script Awal berada di bawah target.');
+
+  // Bandingin FU2 & Arsip vs periode sebelumnya
+  const prevRange = getPreviousRange(from,to);
+  const prevRows = ALL_REKAP.filter(r=>r.tanggal>=prevRange.from && r.tanggal<=prevRange.to);
+  if(prevRows.length){
+    const prevFu2Total = prevRows.reduce((s,r)=>s+r.beliFu2+r.tidakFu2,0);
+    const prevFu2Beli = prevRows.reduce((s,r)=>s+r.beliFu2,0);
+    const prevFu2Konv = prevFu2Total>0 ? (prevFu2Beli/prevFu2Total*100) : null;
+    if(prevFu2Konv!==null && stageData.fu2.total>0 && stageData.fu2.konversi<prevFu2Konv)
+      lain.push('Konversi FU 2 menurun dibanding periode sebelumnya ('+prevFu2Konv.toFixed(1)+'% → '+stageData.fu2.konversi.toFixed(1)+'%).');
+
+    const prevArsip = prevRows.reduce((s,r)=>s+r.tidakFu3,0);
+    if(totArsip>prevArsip) lain.push('Jumlah arsip meningkat dari periode sebelumnya ('+prevArsip+' → '+totArsip+').');
+  }
+
+  if(stageData.fu3.total>0 && (stageData.fu3.tidak/stageData.fu3.total)>0.8)
+    lain.push('FU 3 menghasilkan terlalu banyak arsip ('+Math.round(stageData.fu3.tidak/stageData.fu3.total*100)+'% dari total FU3).');
+
+  const belumIsiAlasan = rows.some(r=>
+    ((r.beliAwal+r.tidakAwal)>0 && !r.alasanAwal) || ((r.beliFu1+r.tidakFu1)>0 && !r.alasanFu1) ||
+    ((r.beliFu2+r.tidakFu2)>0 && !r.alasanFu2) || ((r.beliFu3+r.tidakFu3)>0 && !r.alasanFu3));
+  if(belumIsiAlasan) lain.push('Ada hari dalam periode ini yang belum diisi alasan dominan-nya.');
+
+  if(rows.length===0 || stageData.awal.total<10) lain.push('Data pada periode ini masih terlalu sedikit untuk dievaluasi secara meyakinkan.');
+
+  if(lain.length){
+    html += `<div class="alert-box warn"><div class="alert-title">🔔 Peringatan Lain</div><ul class="alert-list">${lain.map(l=>'<li>'+l+'</li>').join('')}</ul></div>`;
+  }
+  if(!html){
+    html = '<div class="alert-box ok"><div class="alert-title">✅ Semua Aman</div>Gak ada peringatan pada periode ini — semua tahap berjalan sesuai atau di atas target.</div>';
+  }
+  box.innerHTML = html;
+}
+
+// ══════════════════════════════════════════════════════
+// REKOMENDASI OTOMATIS
+// ══════════════════════════════════════════════════════
+const REKOMENDASI_MAP = {
+  'Tidak merespons': 'Pendekkan script. Gunakan satu pertanyaan sederhana. Hindari pesan yang terlalu panjang atau terlihat seperti broadcast.',
+  'Harga terlalu tinggi': 'Tambahkan manfaat, alternatif produk, promo, atau pilihan sesuai anggaran. Jangan hanya mengirimkan harga.',
+  'Menunggu dana': 'Gunakan pendekatan konsultasi. Tawarkan pilihan produk sesuai anggaran dan lakukan follow-up dengan lebih ringan.',
+  'Masih membandingkan': 'Tambahkan pembeda Kubah Emas seperti bantuan menghitung kebutuhan, pelayanan pengiriman, promo, dan retur material tertentu.',
+  'Sudah membeli di tempat lain': 'Evaluasi kecepatan respons dan waktu follow-up. Kemungkinan konsumen menerima penawaran kompetitor lebih cepat.',
+  'Belum membutuhkan': 'Simpan sebagai leads jangka panjang — follow-up berkala (misal 1-2 bulan sekali) tanpa terkesan memaksa, biar tetap diingat pas kebutuhan mereka muncul nanti.',
+  'Menunggu keputusan keluarga': 'Bantu konsumen menyiapkan bahan diskusi keluarga — misal ringkasan penawaran dalam bentuk gambar/PDF yang gampang dishare, dan follow-up di waktu yang wajar (jangan terlalu cepat setelah pesan pertama).',
+  'Produk tidak sesuai': 'Gali lebih detail kebutuhan spesifik konsumen sebelum kasih penawaran, dan siapkan alternatif varian produk yang lebih sesuai.',
+  'Lainnya': 'Alasan tercatat sebagai "Lainnya" — cek catatan manual tim CS buat pahamin pola spesifiknya, karena sistem gak bisa kasih rekomendasi detail dari label umum ini.',
+};
+function renderRekomendasi(rows){
+  const counts={};
+  rows.forEach(r=>{
+    [r.alasanAwal,r.alasanFu1,r.alasanFu2,r.alasanFu3].forEach(a=>{
+      if(a) counts[a]=(counts[a]||0)+1;
+    });
+  });
+  const sorted = Object.keys(counts).sort((a,b)=>counts[b]-counts[a]).slice(0,3);
+  const box = document.getElementById('recoBox');
+  if(sorted.length===0){
+    box.innerHTML = '<div class="empty-note">Belum ada data alasan dominan pada periode ini.</div>';
+    return;
+  }
+  box.innerHTML = sorted.map(a=>`
+    <div class="reco-item">
+      <div class="reco-item-title">${esc(a)} (${counts[a]}x disebut)</div>
+      <div class="reco-item-text">${esc(REKOMENDASI_MAP[a]||REKOMENDASI_MAP['Lainnya'])}</div>
+    </div>`).join('');
+}
+
+// ══════════════════════════════════════════════════════
+// KESIMPULAN OTOMATIS
+// ══════════════════════════════════════════════════════
+function renderKesimpulan(stageData, rows){
+  const box = document.getElementById('kesimpulanBox');
+  if(rows.length===0){ box.innerHTML='Belum ada data rekap pada periode ini.'; return; }
+
+  const stages = Object.values(stageData);
+  const efektifStages = stages.filter(s=>s.status==='efektif'||s.status==='efektif_terbatas').map(s=>s.label);
+  const belowStages = stages.filter(s=>s.status==='tidak_efektif'||s.status==='perlu_pantau').map(s=>s.label);
+  const highestBeli = stages.reduce((a,b)=>b.beli>a.beli?b:a, stages[0]);
+  const dom = dominantAlasan(rows,'alasanAwal') || dominantAlasan(rows,'alasanFu1');
+  const priority = stages.filter(s=>s.status==='tidak_efektif').sort((a,b)=>(b.target-b.konversi)-(a.target-a.konversi))[0];
+
+  let p = '';
+  p += efektifStages.length ? 'Konversi <b>'+efektifStages.join(', ')+'</b> mencapai target dan dinyatakan efektif. ' : '';
+  p += belowStages.length ? '<b>'+belowStages.join(', ')+'</b> masih berada di bawah target. ' : '';
+  p += 'Tahap pembelian tertinggi terjadi pada <b>'+highestBeli.label+'</b> ('+highestBeli.beli+' pembelian). ';
+  p += dom ? 'Alasan tidak membeli terbanyak adalah <b>'+esc(dom).toLowerCase()+'</b>. ' : '';
+  p += priority ? 'Prioritas perbaikan diarahkan pada Script <b>'+priority.label+'</b> — pertimbangkan rekomendasi di atas.' : 'Gak ada tahap yang butuh perbaikan mendesak pada periode ini.';
+
+  box.innerHTML = p;
+}
+
+// ══════════════════════════════════════════════════════
+// MODAL PENGATURAN TARGET
+// ══════════════════════════════════════════════════════
+function openTargetModal(){
+  const t = getTargets();
+  document.getElementById('target-awal').value = t.awal;
+  document.getElementById('target-fu1').value = t.fu1;
+  document.getElementById('target-fu2').value = t.fu2;
+  document.getElementById('target-fu3').value = t.fu3;
+  document.getElementById('targetOverlay').classList.add('show');
+}
+function closeTargetModal(){ document.getElementById('targetOverlay').classList.remove('show'); }
+function saveTargets(){
+  const t = {
+    awal: Number(document.getElementById('target-awal').value)||0,
+    fu1: Number(document.getElementById('target-fu1').value)||0,
+    fu2: Number(document.getElementById('target-fu2').value)||0,
+    fu3: Number(document.getElementById('target-fu3').value)||0,
+  };
+  ss('au_targets', t);
+  closeTargetModal();
+  toast('✅ Target berhasil disimpan.');
+  renderDashboard();
+}
+
+// ══════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════
+// CLOUD BACKUP (rekap yang gagal terkirim — biar gak ilang
+// kalau HP clear cache sebelum sempat kekirim ulang). Pakai
+// endpoint & token yang SAMA dengan submit rekap.
+// ══════════════════════════════════════════════════════
+const CLOUD_URL_KEY='au_cloud_url', CLOUD_TOKEN_KEY='au_cloud_token', CLOUD_LAST_KEY='au_cloud_last_sync';
+function getCloudUrl(){
+  const v=localStorage.getItem(CLOUD_URL_KEY);
+  if(v) return v;
+  return (CONFIG.apps_script_url && CONFIG.apps_script_url.indexOf('GANTI_')!==0) ? CONFIG.apps_script_url : '';
+}
+function getCloudToken(){
+  const v=localStorage.getItem(CLOUD_TOKEN_KEY);
+  if(v) return v;
+  return (CONFIG.token && CONFIG.token.indexOf('GANTI_')!==0) ? CONFIG.token : '';
+}
+function setCloudLastSync(ts){ localStorage.setItem(CLOUD_LAST_KEY, ts); }
+function getCloudLastSync(){ return localStorage.getItem(CLOUD_LAST_KEY) || ''; }
+function getDeviceId(){
+  let id = localStorage.getItem('au_device_id');
+  if(!id){ id='hp-'+Math.random().toString(36).slice(2,8); localStorage.setItem('au_device_id', id); }
+  return id;
+}
+
+function savePendingDraft(payload){
+  const drafts = ls('au_pending_drafts', []);
+  drafts.push(payload);
+  ss('au_pending_drafts', drafts);
+  scheduleSync();
+}
+function removePendingDraft(tanggal){
+  const drafts = ls('au_pending_drafts', []);
+  ss('au_pending_drafts', drafts.filter(d=>d.tanggal!==tanggal));
+  scheduleSync();
+}
+async function resendPendingDrafts(){
+  const drafts = ls('au_pending_drafts', []);
+  if(!drafts.length || !isConfigured()) return;
+  for(const d of drafts){
+    try{
+      d.confirm_overwrite = true; // draft lama, langsung timpa kalau ternyata udah ada
+      const res = await fetch(CONFIG.apps_script_url,{
+        method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body:JSON.stringify(d)
+      }).then(r=>r.json());
+      if(res.status==='ok') removePendingDraft(d.tanggal);
+    }catch(e){ /* biarin, coba lagi lain kali */ }
+  }
+  loadAllRekap();
+}
+
+let _syncTimer=null;
+function scheduleSync(){
+  if(!getCloudUrl()) return;
+  if(_syncTimer) clearTimeout(_syncTimer);
+  _syncTimer = setTimeout(()=>syncToCloud(false), 3000);
+}
+function syncToCloud(manual){
+  const url=getCloudUrl();
+  if(!url){ if(manual)toast('Cloud Backup belum aktif.'); return; }
+  const drafts = ls('au_pending_drafts', []);
+  const payload = { action:'backup_sync', token:getCloudToken(), device:getDeviceId(), data:{ au_pending_drafts: drafts } };
+  fetch(url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)})
+    .then(r=>r.json())
+    .then(res=>{
+      if(res.status==='ok'){ setCloudLastSync(new Date().toISOString()); if(manual){ toast('✅ Backup ke cloud berhasil.'); renderCloudStatus(); } }
+      else if(manual){ toast('❌ Gagal backup: '+(res.message||'unknown error')); }
+    })
+    .catch(err=>{ if(manual) toast('❌ Gagal konek ke cloud: '+err); });
+}
+function restoreFromCloud(manual){
+  const url=getCloudUrl();
+  if(!url){ if(manual)toast('Cloud Backup belum aktif.'); return; }
+  fetch(url+'?mode=backup&token='+encodeURIComponent(getCloudToken()))
+    .then(r=>r.json())
+    .then(res=>{
+      if(res.status!=='ok'){ if(manual)toast('❌ '+(res.message||'Gagal ambil backup.')); return; }
+      const doApply=()=>{
+        if(res.data && res.data.au_pending_drafts) ss('au_pending_drafts', res.data.au_pending_drafts);
+        setCloudLastSync(res.timestamp);
+        toast('✅ Draft dipulihkan dari cloud.');
+        renderCloudStatus();
+        resendPendingDrafts();
+      };
+      if(manual){
+        if(confirm('Timpa draft lokal dengan backup cloud tanggal '+new Date(res.timestamp).toLocaleString('id-ID')+'?')) doApply();
+      } else { doApply(); }
+    })
+    .catch(err=>{ if(manual) toast('❌ Gagal konek ke cloud: '+err); });
+}
+function checkAndRestoreOnBoot(){
+  const url=getCloudUrl();
+  if(!url) return;
+  const hasLocal = ls('au_pending_drafts', []).length>0;
+  if(hasLocal){ resendPendingDrafts(); return; }
+  fetch(url+'?mode=backup&token='+encodeURIComponent(getCloudToken()))
+    .then(r=>r.json())
+    .then(res=>{
+      if(res.status!=='ok') return;
+      if(res.data && res.data.au_pending_drafts && res.data.au_pending_drafts.length){
+        if(confirm('Ada rekap yang belum kekirim tersimpan di cloud (tanggal backup '+new Date(res.timestamp).toLocaleString('id-ID')+').\n\nPulihkan & coba kirim ulang sekarang?')){
+          ss('au_pending_drafts', res.data.au_pending_drafts);
+          setCloudLastSync(res.timestamp);
+          resendPendingDrafts();
+        }
+      }
+    })
+    .catch(()=>{});
+}
+function openSettings(){
+  document.getElementById('settingsOverlay').classList.add('show');
+  renderCloudStatus();
+}
+function closeSettings(){
+  document.getElementById('settingsOverlay').classList.remove('show');
+}
+function renderCloudStatus(){
+  const box = document.getElementById('cloudStatusBox');
+  const embedded = CONFIG.apps_script_url.indexOf('GANTI_')!==0 && CONFIG.token.indexOf('GANTI_')!==0;
+  const last = getCloudLastSync();
+  const pending = ls('au_pending_drafts', []).length;
+  let h='';
+  if(embedded){
+    h += '<div class="alert-box ok" style="margin-bottom:10px">✅ Alamat backup sudah ketanam permanen di file app ini.</div>';
+  } else {
+    h += '<div class="alert-box warn" style="margin-bottom:10px">⚠️ Cloud Backup belum diaktifkan di file ini.</div>';
+  }
+  h += `<div class="fhint" style="margin-bottom:12px">Sync terakhir: ${last?new Date(last).toLocaleString('id-ID'):'Belum pernah'} · Draft belum kekirim: <b>${pending}</b></div>`;
+  box.innerHTML = h;
+}
+
+populateAlasanSelects();
+document.getElementById('f-tanggal').value = todayStr();
+document.getElementById('dateTo').value = todayStr();
+loadAllRekap();
+checkAndRestoreOnBoot();
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load',function(){
+    navigator.serviceWorker.register('./sw.js')
+      .then(function(r){console.log('[SW] OK',r.scope);})
+      .catch(function(e){console.warn('[SW]',e);});
+  });
+}
+</script>
+
+</body>
+</html>
